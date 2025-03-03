@@ -8,7 +8,7 @@ const Header = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex-shrink-0">
             <Link href="/" className="text-2xl font-bold">
-              FinanceTracker
+            ExpensesTracker
             </Link>
           </div>
           <nav className="hidden md:flex space-x-4">

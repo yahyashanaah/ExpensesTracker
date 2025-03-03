@@ -211,7 +211,7 @@ export default function Home() {
       <main className="flex-grow">
         <div className="max-w-7xl mx-auto p-8">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">Financial Tracker</h1>
+            <h1 className="text-3xl font-bold"></h1>
             <div className="space-x-4">
               <Button
                 onClick={() => {
