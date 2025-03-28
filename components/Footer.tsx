@@ -16,7 +16,9 @@ const Footer = () => {
               </span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
-              Providing professional web development services and innovative solutions for businesses of all sizes.
+            My goal is to create intuitive, efficient, and beautiful digital experiences that solve real-world
+                  problems. I'm constantly learning and exploring new technologies to stay at the forefront of web
+                  development.
             </p>
             <div className="flex items-center space-x-3">
               <Link
