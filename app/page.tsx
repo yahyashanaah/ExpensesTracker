@@ -1,382 +1,165 @@
-"use client"
-
-import type React from "react"
-import { useEffect, useState } from "react"
-import { Plus } from "lucide-react"
+import { Github, Linkedin, Mail, FileText, Code, Server, Database, Palette } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useToast } from "@/components/ui/use-toast"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
-import ExpensesTable from "@/components/ExpensesTable"
-import DeleteConfirmationDialog from "@/components/DeleteConfirmationDialog"
-
-interface Expense {
-  id: number
-  description: string
-  date: string
-  amount: number
-  category_id: number
-  month: string
-}
-
-interface Category {
-  id: number
-  name: string
-}
 
 export default function Home() {
-  const [expenses, setExpenses] = useState<Expense[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
-  const [showExpenseModal, setShowExpenseModal] = useState(false)
-  const [showCategoryModal, setShowCategoryModal] = useState(false)
-  const [currentExpense, setCurrentExpense] = useState<Partial<Expense>>({})
-  const [currentCategory, setCurrentCategory] = useState<Partial<Category>>({})
-  const [isEdit, setIsEdit] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [selectedMonth, setSelectedMonth] = useState<string>("")
-  const { toast } = useToast()
-  const [deleteConfirmation, setDeleteConfirmation] = useState<{ isOpen: boolean; expenseId: number | null }>({
-    isOpen: false,
-    expenseId: null,
-  })
-
-  useEffect(() => {
-    fetchExpenses()
-    fetchCategories()
-  }, [])
-
-  const fetchExpenses = async () => {
-    setIsLoading(true)
-    try {
-      const response = await fetch(selectedMonth ? `/api/expenses?month=${selectedMonth}` : "/api/expenses")
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`)
-      }
-      const data = await response.json()
-      setExpenses(data)
-    } catch (error) {
-      console.error("Failed to fetch expenses:", error)
-      toast({
-        title: "Error",
-        description: "Failed to fetch expenses. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch("/api/categories")
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`)
-      }
-      const data = await response.json()
-      setCategories(data)
-    } catch (error) {
-      console.error("Failed to fetch categories:", error)
-      toast({
-        title: "Error",
-        description: "Failed to fetch categories. Please try again.",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const handleExpenseSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    const url = isEdit ? `/api/expenses/${currentExpense.id}` : "/api/expenses"
-    const method = isEdit ? "PUT" : "POST"
-
-    try {
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(currentExpense),
-      })
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`)
-      }
-
-      setShowExpenseModal(false)
-      fetchExpenses()
-      toast({
-        title: isEdit ? "Expense Updated" : "Expense Added",
-        description: `Successfully ${isEdit ? "updated" : "added"} the expense.`,
-      })
-    } catch (error) {
-      console.error("Failed to submit expense:", error)
-      toast({
-        title: "Error",
-        description: `Failed to ${isEdit ? "update" : "add"} expense. Please try again.`,
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleCategorySubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    const url = isEdit ? `/api/categories/${currentCategory.id}` : "/api/categories"
-    const method = isEdit ? "PUT" : "POST"
-
-    try {
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(currentCategory),
-      })
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`)
-      }
-
-      setShowCategoryModal(false)
-      fetchCategories()
-      toast({
-        title: isEdit ? "Category Updated" : "Category Added",
-        description: `Successfully ${isEdit ? "updated" : "added"} the category.`,
-      })
-    } catch (error) {
-      console.error("Failed to submit category:", error)
-      toast({
-        title: "Error",
-        description: `Failed to ${isEdit ? "update" : "add"} category. Please try again.`,
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleExpenseDelete = async (id: number) => {
-    setIsLoading(true)
-    try {
-      const response = await fetch(`/api/expenses/${id}`, {
-        method: "DELETE",
-      })
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`)
-      }
-
-      fetchExpenses()
-      toast({
-        title: "Expense Deleted",
-        description: "Successfully deleted the expense.",
-      })
-    } catch (error) {
-      console.error("Failed to delete expense:", error)
-      toast({
-        title: "Error",
-        description: "Failed to delete expense. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-      setDeleteConfirmation({ isOpen: false, expenseId: null })
-    }
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setCurrentExpense((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleCategoryChange = (value: string) => {
-    setCurrentExpense((prev) => ({ ...prev, category_id: Number.parseInt(value) }))
-  }
-
-  const handleMonthChange = (value: string) => {
-    setSelectedMonth(value)
-    fetchExpenses()
-  }
-
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-grow">
-        <div className="max-w-7xl mx-auto p-8">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold"></h1>
-            <div className="space-x-4">
-              <Button
-                onClick={() => {
-                  setCurrentExpense({})
-                  setIsEdit(false)
-                  setShowExpenseModal(true)
-                }}
-                className="bg-yellow-400 hover:bg-yellow-500 text-black"
-              >
-                <Plus className="mr-2 h-4 w-4" /> Add Expense
-              </Button>
-              <Button
-                onClick={() => {
-                  setCurrentCategory({})
-                  setIsEdit(false)
-                  setShowCategoryModal(true)
-                }}
-                className="bg-yellow-400 hover:bg-yellow-500 text-black"
-              >
-                <Plus className="mr-2 h-4 w-4" /> Add Category
+        <section className="py-20 bg-gradient-to-b from-primary/10 to-background">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center space-y-4 text-center">
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Yahia Shanaah</h1>
+                <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
+                  Full Stack Developer & UI/UX Designer
+                </p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-4">
+                <Button variant="outline" size="icon" asChild>
+                  <a href="https://github.com/yahyashanaah" target="_blank" rel="noopener noreferrer">
+                    <Github className="h-5 w-5" />
+                    <span className="sr-only">GitHub</span>
+                  </a>
+                </Button>
+                <Button variant="outline" size="icon" asChild>
+                  <a href="https://www.linkedin.com/in/yahya-shana%E2%80%99ah-5998961b5/" target="_blank" rel="noopener noreferrer">
+                    <Linkedin className="h-5 w-5" />
+                    <span className="sr-only">LinkedIn</span>
+                  </a>
+                </Button>
+                <Button variant="outline" size="icon" asChild>
+                  <a href="mailto:yahya.shanaah@gmail.com">
+                    <Mail className="h-5 w-5" />
+                    <span className="sr-only">Email</span>
+                  </a>
+            </Button>
+                <Button variant="outline" size="icon" asChild>
+                <a href="/resume.pdf" download="Yahya_Shannash_Resume.pdf">
+                <FileText className="h-5 w-5" />
+                <span className="sr-only">Resume</span>
+                </a>
+            </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-12 md:py-16">
+          <div className="container px-4 md:px-6">
+            <div className="mx-auto max-w-[800px] space-y-6">
+              <div className="space-y-2">
+                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">About Me</h2>
+                <p className="text-muted-foreground">
+                  I'm a passionate full-stack developer with over 5 years of experience building web applications. I
+                  specialize in React, Next.js, Node.js, and modern web technologies.
+                </p>
+                <p className="text-muted-foreground">
+                  My goal is to create intuitive, efficient, and beautiful digital experiences that solve real-world
+                  problems. I'm constantly learning and exploring new technologies to stay at the forefront of web
+                  development.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-12 md:py-16 bg-muted/50">
+          <div className="container px-4 md:px-6">
+            <div className="mx-auto max-w-[1200px] space-y-8">
+              <div className="space-y-2 text-center">
+                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">My Skills</h2>
+                <p className="text-muted-foreground">Here are some of the technologies and tools I work with</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2">
+                      <Code className="h-5 w-5" /> Frontend
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>React & Next.js</li>
+                      <li>TypeScript</li>
+                      <li>Tailwind CSS</li>
+                      <li>HTML5 & CSS3</li>
+                      <li>Redux & Context API</li>
+                    </ul>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2">
+                      <Server className="h-5 w-5" /> Backend
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>Node.js & Express</li>
+                      <li>Python & Django</li>
+                      <li>RESTful APIs</li>
+                      <li>GraphQL</li>
+                      <li>Authentication & Security</li>
+                    </ul>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2">
+                      <Database className="h-5 w-5" /> Database
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>MongoDB</li>
+                      <li>PostgreSQL</li>
+                      <li>SQL</li>
+                      <li>Firebase</li>
+                      <li>SQLite</li>
+                    </ul>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2">
+                      <Palette className="h-5 w-5" /> Design
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>UI/UX Design</li>
+                      <li>Figma & Adobe XD</li>
+                      <li>Responsive Design</li>
+                      <li>Accessibility</li>
+                      <li>Design Systems</li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-12 md:py-16">
+          <div className="container px-4 md:px-6">
+            <div className="mx-auto max-w-[800px] space-y-6 text-center">
+              <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Let's Work Together</h2>
+              <p className="text-muted-foreground">
+                I'm currently available for freelance work and open to new opportunities. If you have a project that
+                needs my expertise, feel free to reach out.
+              </p>
+              <Button asChild size="lg">
+                <a href="mailto:yahya.shanaah@gmail.com">Contact Me</a>
               </Button>
             </div>
           </div>
-
-          <div className="mb-4">
-            <Select onValueChange={handleMonthChange}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select month" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All months</SelectItem>
-                {/* Add more months as needed */}
-                <SelectItem value="2023-05">May 2023</SelectItem>
-                <SelectItem value="2023-06">June 2023</SelectItem>
-                <SelectItem value="2023-07">July 2023</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <ExpensesTable
-            expenses={expenses}
-            categories={categories}
-            onEdit={(expense) => {
-              setCurrentExpense(expense)
-              setIsEdit(true)
-              setShowExpenseModal(true)
-            }}
-            onDeleteClick={(expense) => setDeleteConfirmation({ isOpen: true, expenseId: expense.id })}
-          />
-        </div>
+        </section>
       </main>
       <Footer />
-
-      <Dialog open={showExpenseModal} onOpenChange={setShowExpenseModal}>
-        <DialogContent className="sm:max-w-[500px] bg-card">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">{isEdit ? "Edit Expense" : "Add New Expense"}</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleExpenseSubmit}>
-            <div className="grid gap-6 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="description" className="text-right">
-                  Description
-                </Label>
-                <Input
-                  id="description"
-                  name="description"
-                  value={currentExpense.description || ""}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="date" className="text-right">
-                  Date
-                </Label>
-                <Input
-                  id="date"
-                  name="date"
-                  type="date"
-                  value={currentExpense.date || ""}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="amount" className="text-right">
-                  Amount
-                </Label>
-                <Input
-                  id="amount"
-                  name="amount"
-                  type="number"
-                  step="0.01"
-                  value={currentExpense.amount || ""}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="category" className="text-right">
-                  Category
-                </Label>
-                <Select onValueChange={handleCategoryChange} defaultValue={currentExpense.category_id?.toString()}>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id.toString()}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit" disabled={isLoading} className="bg-yellow-400 hover:bg-yellow-500 text-black">
-                {isLoading ? "Processing..." : isEdit ? "Update" : "Add"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showCategoryModal} onOpenChange={setShowCategoryModal}>
-        <DialogContent className="sm:max-w-[500px] bg-card">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">{isEdit ? "Edit Category" : "Add New Category"}</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleCategorySubmit}>
-            <div className="grid gap-6 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Name
-                </Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={currentCategory.name || ""}
-                  onChange={(e) => setCurrentCategory({ ...currentCategory, name: e.target.value })}
-                  className="col-span-3"
-                  required
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit" disabled={isLoading} className="bg-yellow-400 hover:bg-yellow-500 text-black">
-                {isLoading ? "Processing..." : isEdit ? "Update" : "Add"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-      <DeleteConfirmationDialog
-        isOpen={deleteConfirmation.isOpen}
-        onClose={() => setDeleteConfirmation({ isOpen: false, expenseId: null })}
-        onConfirm={() => deleteConfirmation.expenseId && handleExpenseDelete(deleteConfirmation.expenseId)}
-        title="Delete Expense"
-        description="Are you sure you want to delete this expense? This action cannot be undone."
-      />
     </div>
   )
 }

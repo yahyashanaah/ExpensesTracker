@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 import { format } from "date-fns"
 import { Pencil, Trash2 } from "lucide-react"
@@ -59,7 +61,7 @@ const ExpensesTable: React.FC<ExpensesTableProps> = ({ expenses, categories, onE
                     variant="outline"
                     size="sm"
                     onClick={() => onDeleteClick(expense)}
-                    className="text-red-400 border-red-400 hover:bg-red-400/20 hover:text-red-300"
+                    className="text-destructive border-destructive hover:bg-destructive/10"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
