@@ -82,7 +82,7 @@ const Header = () => {
 
             <div className="py-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Services</span>
+                <span className="text-sm font-medium">Ideas</span>
               </div>
               <div className="pl-4 mt-2 space-y-2 border-l border-border">
                 <Link

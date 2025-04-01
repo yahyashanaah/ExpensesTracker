@@ -78,7 +78,7 @@ export default function Home() {
                 <p className="text-muted-foreground">
                   I'm a passionate software engineer who loves building scalable
                   web applications and solving complex problems. I specialize in
-                  C#, ASP.NET Core, FastAPI, Next.js, and Angular, and I'm
+                  C#, ASP.NET Core, FastAPI, Node.js, Next.js, and Angular, and I'm
                   always eager to explore new tools and frameworks.
                 </p>
                 <p className="text-muted-foreground">

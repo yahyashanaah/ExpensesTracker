@@ -242,9 +242,9 @@ export default function ExpensesPage() {
               <SelectContent>
                 <SelectItem value="all">All months</SelectItem>
                 {/* Add more months as needed */}
-                <SelectItem value="2023-05">May 2023</SelectItem>
-                <SelectItem value="2023-06">June 2023</SelectItem>
-                <SelectItem value="2023-07">July 2023</SelectItem>
+                <SelectItem value="2023-05">May 2025</SelectItem>
+                <SelectItem value="2023-06">June 2025</SelectItem>
+                <SelectItem value="2023-07">July 2025</SelectItem>
               </SelectContent>
             </Select>
           </div>
