@@ -1,8 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server"
 
+type RouteParams = {
+  params: {
+    id: string
+  }
+}
+
 const API_BASE_URL = "http://127.0.0.1:8000"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const id = params.id
 
@@ -25,7 +31,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const id = params.id
 
